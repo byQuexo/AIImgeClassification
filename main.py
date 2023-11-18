@@ -3,15 +3,21 @@ import torch
 from PIL import Image, ImageDraw
 import requests
 
-url = "https://imgs.search.brave.com/DkkwHvLKgHtrghG_ouzRwgBWl1cxvsAPu3ksuuVhmHs/rs:fit:860:0:0/g:ce/aHR0cHM6Ly9tYWNo/aW5lbGVhcm5pbmdt/YXN0ZXJ5LmNvbS93/cC1jb250ZW50L3Vw/bG9hZHMvMjAxOS8w/MS9QbG90LW9mLWEt/U3Vic2V0LW9mLUlt/YWdlcy1mcm9tLXRo/ZS1DSUZBUi0xMC1E/YXRhc2V0LnBuZw"
+url = "https://imgur.com/hgxd45J.jpg"
 image = Image.open(requests.get(url, stream=True).raw)
 
-# you can specify the revision tag if you don't want the timm dependency
+# Check if the  image has 3 dimensions, and if not, convert it to RGB
+if len(image.getbands()) == 1:
+    image = image.convert("RGB")
+
+# Initialize the image processor and model
 processor = DetrImageProcessor.from_pretrained("facebook/detr-resnet-50", revision="no_timm")
 model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50", revision="no_timm")
 
+# Preprocess the image
 inputs = processor(images=image, return_tensors="pt")
 outputs = model(**inputs)
+
 
 # convert outputs (bounding boxes and class logits) to COCO API
 # let's only keep detections with score > 0.9
